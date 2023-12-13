@@ -12,31 +12,70 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Arial', sans-serif; /* Use a sans-serif font */
+      font-family: 'Arial', sans-serif;
     }
 
     #map {
       position: absolute;
       top: 0;
       bottom: 0;
+      width: 80%; /* Adjust the map width */
+      float: left;
+    }
+
+    #digitizeButton {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px;
+      background-color: #f4f4f4;
+      z-index: 1;
+      border-radius: 5px;
+    }
+
+    .modal input, .modal button {
       width: 100%;
-    }
-
-    /* Style the popup dialog */
-    .mapboxgl-popup {
-      max-width: 200px;
-      font-family: 'Arial', sans-serif; /* Use a sans-serif font */
-    }
-
-    /* Style the marker */
-    .mapboxgl-marker {
-      width: 20px; /* Set the width of the marker */
-      height: 20px; /* Set the height of the marker */
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <button id="digitizeButton" onclick="openModal()">Digitize Yourself</button>
+
+  <div id="myModal" class="modal">
+    <span onclick="closeModal()" style="cursor: pointer; float: right;">&times;</span>
+    <h2>Digitize Yourself</h2>
+    <form id="digitizeForm">
+      <label for="latitude">Latitude:</label>
+      <input type="text" id="latitude" required>
+
+      <label for="longitude">Longitude:</label>
+      <input type="text" id="longitude" required>
+
+      <label for="message">Message:</label>
+      <input type="text" id="message" required>
+
+      <button type="button" onclick="addMarker()">Add Marker</button>
+    </form>
+  </div>
 
   <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dpYW5uMDIiLCJhIjoiY2xwbXh1eGlzMDN5MjJqbW1qY2I3ZTRhbiJ9.OvzQUjKS7Vgr63ckOc2N_w';
@@ -48,22 +87,29 @@
       zoom: 15
     });
 
-    // Load and add points from the CSV file
-    map.on('load', function () {
-      fetch('points.csv')
-        .then(response => response.text())
-        .then(csvData => {
-          var points = Papa.parse(csvData, { header: true }).data;
+    // Function to open the modal
+    function openModal() {
+      document.getElementById('myModal').style.display = 'block';
+    }
 
-          // Add points to the map
-          points.forEach(point => {
-            new mapboxgl.Marker({ color: 'lightpink' })
-              .setLngLat([parseFloat(point.longitude), parseFloat(point.latitude)])
-              .addTo(map)
-              .setPopup(new mapboxgl.Popup().setHTML('<p style="margin: 0;">' + point.message + '</p><form style="margin-top: 10px;"><input type="text" placeholder="Enter something" style="width: 100%;"><button type="submit" style="width: 100%;">Submit</button></form>'));
-          });
-        });
-    });
+    // Function to close the modal
+    function closeModal() {
+      document.getElementById('myModal').style.display = 'none';
+    }
+
+    // Function to add a new marker to the map
+    function addMarker() {
+      var latitude = parseFloat(document.getElementById('latitude').value);
+      var longitude = parseFloat(document.getElementById('longitude').value);
+      var message = document.getElementById('message').value;
+
+      new mapboxgl.Marker({ color: 'lightblue' })
+        .setLngLat([longitude, latitude])
+        .addTo(map)
+        .setPopup(new mapboxgl.Popup().setHTML('<p>' + message + '</p>'));
+
+      closeModal(); // Close the modal after adding the marker
+    }
   </script>
 </body>
 </html>
