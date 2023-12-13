@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digitizing Myself</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-  <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+   <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+   <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
   <style>
     body { margin: 0; padding: 0; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
@@ -20,7 +20,7 @@
 
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/ggiann02/clq3z0sjt003f01pdf3iq6mhb', // Set the minimalistic light style
+      style: 'mapbox://styles/ggiann02/clpw1hmir00xr01p64y2p18xh', // Set the minimalistic light style
       center: [9.2133, 45.2827], // Coordinates for Rodano, Italy
       zoom: 15
     });
@@ -35,52 +35,53 @@
           // Add points to the map
           points.forEach(point => {
             map.addLayer({
-              id: 'circleLayer-' + point.id,
-              type: 'circle',
-              source: {
-                type: 'geojson',
-                data: {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)]
-                  }
-                }
-              },
-              paint: {
-                'circle-radius': 8, // Adjust the radius as needed
-                'circle-color': 'black'
-              }
-            });
+  id: 'circleLayer-' + point.id, // Assign a unique ID to each circle layer
+  type: 'circle',
+  source: {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)]
+      }
+    }
+  },
+  paint: {
+    'circle-radius': 8, // Adjust the radius as needed
+    'circle-color': 'black'
+  }
+});
 
-            map.on('click', 'circleLayer-' + point.id, function () {
-              // Handle click event for the circle layer
-              // You can use this to open a popup or perform other actions
-            });
+map.on('click', 'circleLayer-' + point.id, function () {
+  // Handle click event for the circle layer
+  // You can use this to open a popup or perform other actions
+});
 
-            // Set a popup for the circle layer
-            map.on('mouseenter', 'circleLayer-' + point.id, function (e) {
-              map.getCanvas().style.cursor = 'pointer';
-              var coordinates = e.features[0].geometry.coordinates.slice();
-              var description = '<p>' + point.message + '</p><form><input type="text" placeholder="Enter something"><button type="submit">Submit</button></form>';
+// Set a popup for the circle layer
+map.on('mouseenter', 'circleLayer-' + point.id, function (e) {
+  map.getCanvas().style.cursor = 'pointer';
+  var coordinates = e.features[0].geometry.coordinates.slice();
+  var description = '<p>' + point.message + '</p><form><input type="text" placeholder="Enter something"><button type="submit">Submit</button></form>';
 
-              // Ensure that if the map is zoomed out such that multiple
-              // copies of the feature are visible, the popup appears
-              // over the copy being pointed to.
-              while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-              }
+  // Ensure that if the map is zoomed out such that multiple
+  // copies of the feature are visible, the popup appears
+  // over the copy being pointed to.
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
 
-              new mapboxgl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(description)
-                .addTo(map);
-            });
+  new mapboxgl.Popup()
+    .setLngLat(coordinates)
+    .setHTML(description)
+    .addTo(map);
+});
 
-            // Change the cursor back to the default when it leaves the circle layer
-            map.on('mouseleave', 'circleLayer-' + point.id, function () {
-              map.getCanvas().style.cursor = '';
-            });
+// Change the cursor back to the default when it leaves the circle layer
+map.on('mouseleave', 'circleLayer-' + point.id, function () {
+  map.getCanvas().style.cursor = '';
+});
+
           });
         });
     });
