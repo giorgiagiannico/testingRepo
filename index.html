@@ -1,90 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Digitizing Myself</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-   <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-   <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
-  <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
 </head>
 <body>
-  <div id="map"></div>
+    <div id="map"></div>
 
-  <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dpYW5uMDIiLCJhIjoiY2xwbXh1eGlzMDN5MjJqbW1qY2I3ZTRhbiJ9.OvzQUjKS7Vgr63ckOc2N_w';
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dpYW5uMDIiLCJhIjoiY2xwbXh1eGlzMDN5MjJqbW1qY2I3ZTRhbiJ9.OvzQUjKS7Vgr63ckOc2N_w';
 
-    var map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/ggiann02/clpw1hmir00xr01p64y2p18xh', // Set the minimalistic light style
-      center: [9.2133, 45.2827], // Coordinates for Rodano, Italy
-      zoom: 15
-    });
-
-    // Load and add points from the CSV file
-    map.on('load', function () {
-      fetch('points.csv')
-        .then(response => response.text())
-        .then(csvData => {
-          var points = Papa.parse(csvData, { header: true }).data;
-
-          // Add points to the map
-          points.forEach(point => {
-            map.addLayer({
-  id: 'circleLayer-' + point.id, // Assign a unique ID to each circle layer
-  type: 'circle',
-  source: {
-    type: 'geojson',
-    data: {
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)]
-      }
-    }
-  },
-  paint: {
-    'circle-radius': 8, // Adjust the radius as needed
-    'circle-color': 'black'
-  }
-});
-
-map.on('click', 'circleLayer-' + point.id, function () {
-  // Handle click event for the circle layer
-  // You can use this to open a popup or perform other actions
-});
-
-// Set a popup for the circle layer
-map.on('mouseenter', 'circleLayer-' + point.id, function (e) {
-  map.getCanvas().style.cursor = 'pointer';
-  var coordinates = e.features[0].geometry.coordinates.slice();
-  var description = '<p>' + point.message + '</p><form><input type="text" placeholder="Enter something"><button type="submit">Submit</button></form>';
-
-  // Ensure that if the map is zoomed out such that multiple
-  // copies of the feature are visible, the popup appears
-  // over the copy being pointed to.
-  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-  }
-
-  new mapboxgl.Popup()
-    .setLngLat(coordinates)
-    .setHTML(description)
-    .addTo(map);
-});
-
-// Change the cursor back to the default when it leaves the circle layer
-map.on('mouseleave', 'circleLayer-' + point.id, function () {
-  map.getCanvas().style.cursor = '';
-});
-
-          });
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/ggiann02/clpw1hmir00xr01p64y2p18xh',
+            center: [9.3561335, 45.4732865],
+            zoom: 15
         });
-    });
-  </script>
+
+        // Add navigation control to the map
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // Load and display points from CSV file
+        map.on('load', function () {
+            // Load CSV data
+            fetch('points.csv')
+                .then(response => response.text())
+                .then(data => {
+                    // Parse CSV data
+                    var points = Papa.parse(data, { header: true }).data;
+
+                    // Add points to the map
+                    map.addSource('points', {
+                        type: 'geojson',
+                        data: {
+                            type: 'FeatureCollection',
+                            features: points.map(point => ({
+                                type: 'Feature',
+                                geometry: {
+                                    type: 'Point',
+                                    coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)]
+                                },
+                                properties: {
+                                    title: point.message,
+                                }
+                            }))
+                        }
+                    });
+
+                    map.addLayer({
+                        id: 'points',
+                        type: 'circle',
+                        source: 'points',
+                        paint: {
+                            'circle-radius': 6,
+                            'circle-color': '#FF0000'
+                        }
+                    });
+                });
+        });
+    </script>
 </body>
 </html>
