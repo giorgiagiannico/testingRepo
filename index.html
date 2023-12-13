@@ -5,11 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Digitizing Myself</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-   <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
-   <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+
   <style>
-    body { margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif; /* Use a sans-serif font */
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    /* Style the popup dialog */
+    .mapboxgl-popup {
+      max-width: 200px;
+      font-family: 'Arial', sans-serif; /* Use a sans-serif font */
+    }
+
+    /* Style the marker */
+    .mapboxgl-marker {
+      width: 20px; /* Set the width of the marker */
+      height: 20px; /* Set the height of the marker */
+    }
   </style>
 </head>
 <body>
@@ -20,8 +43,8 @@
 
     var map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/ggiann02/clpw1hmir00xr01p64y2p18xh', // Set the minimalistic light style
-      center: [9.2133, 45.2827], // Coordinates for Rodano, Italy
+      style: 'mapbox://styles/ggiann02/clpw1hmir00xr01p64y2p18xh',
+      center: [9.2133, 45.2827],
       zoom: 15
     });
 
@@ -32,28 +55,12 @@
         .then(csvData => {
           var points = Papa.parse(csvData, { header: true }).data;
 
-          // Add circles to the map
+          // Add points to the map
           points.forEach(point => {
-            map.addLayer({
-              id: 'circle-' + point.id,
-              type: 'circle',
-              source: {
-                type: 'geojson',
-                data: {
-                  type: 'Feature',
-                  properties: {},
-                  geometry: {
-                    type: 'Point',
-                    coordinates: [parseFloat(point.longitude), parseFloat(point.latitude)]
-                  }
-                }
-              },
-              paint: {
-                'circle-radius': 8,
-                'circle-color': 'lightpink',
-                'circle-opacity': 0.8
-              }
-            });
+            new mapboxgl.Marker({ color: 'lightpink' })
+              .setLngLat([parseFloat(point.longitude), parseFloat(point.latitude)])
+              .addTo(map)
+              .setPopup(new mapboxgl.Popup().setHTML('<p style="margin: 0;">' + point.message + '</p><form style="margin-top: 10px;"><input type="text" placeholder="Enter something" style="width: 100%;"><button type="submit" style="width: 100%;">Submit</button></form>'));
           });
         });
     });
