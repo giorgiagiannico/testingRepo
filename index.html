@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id='map'></div>
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2dpYW5uMDIiLCJhIjoiY2xwbXh1eGlzMDN5MjJqbW1qY2I3ZTRhbiJ9.OvzQUjKS7Vgr63ckOc2N_w';
+
+    var coordinates = {
+        center: [9.3561335, 45.4732865],
+        zoom: 15
+    };
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11', // You can replace this with your custom style URL
+        center: coordinates.center,
+        zoom: coordinates.zoom
+    });
+
+    // Custom dark red marker
+    var darkRedMarker = {
+        color: '#8B0000',
+        fillColor: '#8B0000',
+        fillOpacity: 0.8,
+        radius: 8,
+        stroke: true,
+        weight: 2,
+        opacity: 1,
+        className: 'dark-red-marker'
+    };
+
+    // Add 10 markers to the map
+    var markers = [
+        { coordinates: [9.3561335, 45.4732865], message: 'Marker 1: Personalized message here.' },
+        // Add more markers with coordinates and messages as needed
+    ];
+
+    markers.forEach(function(marker) {
+        var el = document.createElement('div');
+        el.className = 'marker';
+        el.style.background = darkRedMarker.color;
+
+        new mapboxgl.Marker(el, darkRedMarker)
+            .setLngLat(marker.coordinates)
+            .addTo(map)
+            .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                .setHTML('<h3>' + marker.message + '</h3><p>What personal memory does this evoke?</p>'));
+    });
+
+</script>
+
+</body>
+</html>
